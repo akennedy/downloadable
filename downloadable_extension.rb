@@ -8,7 +8,7 @@ class DownloadableExtension < Spree::Extension
   
   def self.require_gems(config)
     config.gem 'rubyzip', :lib => 'zip/zip', :version => '0.9.1'
-    config.gem 'aws-s3', :version => '0.6.2'
+    config.gem 'aws-s3', :lib => 'aws/s3', :version => '0.6.2'
   end
   
   def activate
