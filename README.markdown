@@ -21,6 +21,7 @@ Does not smoothly updates from older versions of this extension.
 
 ## NOTES
 	- Requires 'rubyzip' gem (sudo gem install rubyzip)
+	- Requires 'aws-s3' gem (sudo gem install aws-s3)
 	- Enable X-Sendfile to be of praticial use, see comments in downloadable_controller.
 	- Ignores shipping/shipment attributes when there are ONLY downloadable products.
 	- Disables guest checking when order has a downloadable content.
