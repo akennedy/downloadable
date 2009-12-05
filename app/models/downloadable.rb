@@ -1,9 +1,12 @@
 require 'zip/zip'
 class Downloadable < ProductDownload
   has_attached_file :attachment,
-                    :url => "/downloadable/:id/:basename.:extension",
-                    :path => ":rails_root/public/downloadable/:id/:basename.:extension"
-
+                    :url => "s3_domain_url",
+                    :storage => :s3,
+                    :s3_credentials => "#{RAILS_ROOT}/config/s3.yml",
+                    :s3_permissions => 'authenticated-read',
+                    :path => ":attachment/:id/:basename.:extension",
+                    :s3_protocol => 'http'
   
   before_save :set_title
   after_save :create_zip, :unless => :zipfile?

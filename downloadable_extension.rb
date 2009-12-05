@@ -93,6 +93,7 @@ class DownloadableExtension < Spree::Extension
     # Helper class_evals
     # ----------------------------------------------------------------------------------------------------------
     ApplicationHelper.class_eval do
+      require 'aws/s3'
       # Checks if checkout cart has ONLY downloadable items
       # Used for shipping in helpers/checkouts_helper.rb
       def only_downloadable
@@ -111,13 +112,32 @@ class DownloadableExtension < Spree::Extension
         end
       end
       
-      def render_links(item)
-        if !item.product.downloadables.empty?
-          return content_tag(:sub,link_to("#{item.product.downloadables.first.filename}", downloadable_url(item)))
-        elsif !item.variant.downloadables.empty?
-          return content_tag(:sub,link_to("#{item.variant.downloadables.first.filename}", downloadable_url(item)))
+      def render_link(product)
+        if !product.downloadables.empty?
+          get_conn
+          return link_to("#{product.downloadables.first.filename}", AWS::S3::S3Object.url_for(product.downloadables.first.attachment.path(product), get_bucket, :use_ssl => true))
         end
       end
+      
+      def render_links(item)
+        if !item.product.downloadables.empty?
+          get_conn
+          return content_tag(:sub,link_to("#{item.product.downloadables.first.filename}", AWS::S3::S3Object.url_for(item.product.downloadables.first.attachment.path(item), get_bucket, :use_ssl => true)))
+        elsif !item.variant.downloadables.empty?
+          get_conn
+          return content_tag(:sub,link_to("#{item.variant.downloadables.first.filename}", AWS::S3::S3Object.url_for(item.variant.downloadables.first.attachment.path(item), get_bucket, :use_ssl => true)))
+        end
+      end
+      
+      def get_conn
+        access_keys = YAML.load_file("#{RAILS_ROOT}/config/s3.yml")[ENV["RAILS_ENV"]]
+        AWS::S3::Base.establish_connection! :access_key_id => access_keys['access_key_id'], :secret_access_key => access_keys['secret_access_key']        
+      end
+      
+      def get_bucket
+        bucket = YAML.load_file("#{RAILS_ROOT}/config/bucket.yml")[ENV['RAILS_ENV']]['bucket']
+      end
+      
     end
     # ----------------------------------------------------------------------------------------------------------
     # End for Helpers 
